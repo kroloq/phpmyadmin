@@ -139,12 +139,15 @@ final class Options
         $rows = [];
 
         if (strlen($table) > 0 && empty($numTables) && ! $tableObject->isMerge() && $exportType !== 'raw') {
+            // checked impact of change of countRecords -> addressed
+            $numRows = $tableObject->countRecords();
             $rows = [
                 'allrows' => $_POST['allrows'] ?? null,
                 'limit_to' => $_POST['limit_to'] ?? null,
                 'limit_from' => $_POST['limit_from'] ?? null,
                 'unlim_num_rows' => $unlimNumRows,
-                'number_of_rows' => $tableObject->countRecords(),
+                // potential impact
+                'number_of_rows' => ($numRows == -1) ? 0 : $numRows,
             ];
         }
 

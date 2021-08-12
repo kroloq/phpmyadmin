@@ -661,6 +661,7 @@ class Results
             || ($displayParts['sort_lnk'] == '1')
             && (strlen($db) > 0 && strlen($table) > 0)
         ) {
+            // checked impact of change of countRows -> addressed
             $theTotal = $dbi->getTable($db, $table)->countRecords();
         }
 
@@ -870,7 +871,7 @@ class Results
         // Move to the next page or to the last one
         $moveForwardButtons = '';
         if (
-            $this->properties['unlim_num_rows'] === false // view with unknown number of rows
+            $this->properties['unlim_num_rows'] == -1 // view with unknown number of rows
             || (! $isShowingAll
             && intval($_SESSION['tmpval']['pos']) + intval($_SESSION['tmpval']['max_rows'])
                 < $this->properties['unlim_num_rows']
@@ -4062,14 +4063,15 @@ class Results
         }
 
         // 2. ----- Prepare to display the top of the page -----
-
+        //$total = ($total == -1) ? FALSE : $total;
         // 2.1 Prepares a messages with position information
         $sqlQueryMessage = '';
         if (($displayParts['nav_bar'] == '1') && $posNext !== null) {
             $message = $this->setMessageInformation(
                 $sortedColumnMessage,
                 $analyzedSqlResults,
-                $total,
+                // checked impact of change of countRecords -> potential impact -> addressed
+                ($total == -1) ? 0 : $total,
                 $posNext,
                 $preCount,
                 $afterCount
@@ -4405,15 +4407,16 @@ class Results
         ) {
             $firstShownRec = $_SESSION['tmpval']['pos'];
             $lastShownRec  = $total - 1;
+            $debug=strval($lastShownRec);
         } else {
             $firstShownRec = $_SESSION['tmpval']['pos'];
             $lastShownRec  = $posNext - 1;
         }
-
+        
         $table = new Table($this->properties['table'], $this->properties['db']);
         if (
             $table->isView()
-            && ($total == $GLOBALS['cfg']['MaxExactCountViews'])
+            && ($total == -1 || $total == $GLOBALS['cfg']['MaxExactCountViews'])
         ) {
             $message = Message::notice(
                 __(

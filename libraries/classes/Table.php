@@ -422,11 +422,12 @@ class Table implements Stringable
     {
         $tableNumRowInfo = $this->getStatusInfo('TABLE_ROWS', false, true);
         if ($tableNumRowInfo === false) {
+            // checked impact of change of countRecords -> addressed
             $tableNumRowInfo = $this->dbi->getTable($this->dbName, $GLOBALS['showtable']['Name'])
             ->countRecords(true);
         }
-
-        return $tableNumRowInfo ?: 0;
+        // potential impact: -1 evaluates to true -> addressed
+        return ($tableNumRowInfo == -1) ? 0 : $tableNumRowInfo;
     }
 
     /**
@@ -837,6 +838,9 @@ class Table implements Stringable
 
         if ($rowCount) {
             $this->dbi->getCache()->cacheTableContent([$db, $table, 'ExactRows'], $rowCount);
+        } else {
+            // countRecords should always return int value
+            $rowCount = -1;
         }
 
         return $rowCount;

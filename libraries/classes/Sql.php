@@ -504,7 +504,9 @@ class Sql
      */
     public function findRealEndOfRows($db, $table)
     {
+        // returned to caller: checked impact of change of countRecords
         $unlimNumRows = $this->dbi->getTable($db, $table)->countRecords(true);
+        // todo: this function has a hidden side effect
         $_SESSION['tmpval']['pos'] = $this->getStartPosToDisplayRow($unlimNumRows);
 
         return $unlimNumRows;
@@ -799,6 +801,7 @@ class Sql
             // due to $find_real_end == true
             if ($justBrowsing) {
                 // Get row count (is approximate for InnoDB)
+                // checked impact of change of countRecords ->ok
                 $unlimNumRows = $this->dbi->getTable($db, $table)->countRecords();
                 /**
                  * @todo Can we know at this point that this is InnoDB,
@@ -1917,7 +1920,9 @@ class Sql
         $tableObject = new Table($table, $db);
         $unlimNumRows = $tableObject->countRecords(true);
         //If position is higher than number of rows
+        // checked impact of change of countRecords -> -1 and false give the same result if pos>=0 ->ok
         if ($unlimNumRows <= $pos && $pos != 0) {
+            // checked impact of change of countRecords -> no change if maxRows > 1 ->ok
             $pos = $this->getStartPosToDisplayRow($unlimNumRows);
         }
 

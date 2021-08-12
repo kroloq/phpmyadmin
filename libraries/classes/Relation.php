@@ -1598,13 +1598,14 @@ class Relation
         } while (false);
 
         if ($get_total && isset($foreign_db, $foreign_table)) {
+            // checked impact of change of countRecords() --> addressed
             $the_total = $this->dbi->getTable($foreign_db, $foreign_table)
                 ->countRecords(true);
         }
 
         $foreignData = [];
         $foreignData['foreign_link'] = $foreign_link;
-        $foreignData['the_total'] = $the_total ?? null;
+        $foreignData['the_total'] = $the_total ?? null; // returned to caller -> checked and addressed
         $foreignData['foreign_display'] = (
             $foreign_display ?? null
         );

@@ -180,10 +180,13 @@ class SqlController extends AbstractController
             );
         }
 
+        // todo: remove if clause,becuase not used
         /**
          * Need to find the real end of rows?
          */
         if (isset($find_real_end) && $find_real_end) {
+            // checked impact of change of countRecords
+            // no impact, because $unlim_num_rows not used in this function
             $unlim_num_rows = $this->sql->findRealEndOfRows($db, $table);
         }
 

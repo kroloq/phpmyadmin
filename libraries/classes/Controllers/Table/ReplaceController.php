@@ -601,6 +601,8 @@ final class ReplaceController extends AbstractController
 
             /**Get the total row count of the table*/
             $_table = new Table($_POST['table'], $_POST['db']);
+            // checked impact of change of countRecords
+            // potential impact on json -> check web gui -> ok
             $extra_data['row_count'] = $_table->countRecords();
 
             $extra_data['sql_query'] = Generator::getMessage(
