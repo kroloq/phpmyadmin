@@ -422,11 +422,9 @@ class Table implements Stringable
     {
         $tableNumRowInfo = $this->getStatusInfo('TABLE_ROWS', false, true);
         if ($tableNumRowInfo === false) {
-            // checked impact of change of countRecords -> addressed
             $tableNumRowInfo = $this->dbi->getTable($this->dbName, $GLOBALS['showtable']['Name'])
             ->countRecords(true);
         }
-        // potential impact: -1 evaluates to true -> addressed
         return ($tableNumRowInfo == -1) ? 0 : $tableNumRowInfo;
     }
 

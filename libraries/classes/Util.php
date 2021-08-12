@@ -299,9 +299,7 @@ class Util
 
             // set this because Table::countRecords() can use it
             $tableIsView = $table['TABLE_TYPE'] === 'VIEW';
-
             if ($tableIsView || Utilities::isSystemSchema($db)) {
-                // ckecked impact of change of countRecords -> ok
                 $rowCount = $dbi
                     ->getTable($db, $table['Name'])
                     ->countRecords();

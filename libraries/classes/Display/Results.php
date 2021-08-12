@@ -661,7 +661,6 @@ class Results
             || ($displayParts['sort_lnk'] == '1')
             && (strlen($db) > 0 && strlen($table) > 0)
         ) {
-            // checked impact of change of countRows -> addressed
             $theTotal = $dbi->getTable($db, $table)->countRecords();
         }
 
@@ -4070,7 +4069,6 @@ class Results
             $message = $this->setMessageInformation(
                 $sortedColumnMessage,
                 $analyzedSqlResults,
-                // checked impact of change of countRecords -> potential impact -> addressed
                 ($total == -1) ? 0 : $total,
                 $posNext,
                 $preCount,

@@ -1394,8 +1394,6 @@ class Qbe
         foreach ($candidateColumns as $table) {
             if ($checkedTables[$table] != 1) {
                 $tableObj = new Table($table, $this->db);
-                // checked impact of change of countRecords
-                // no impact, only used to evaluate longest table
                 $tsize[$table] = $tableObj->countRecords();
                 $checkedTables[$table] = 1;
             }

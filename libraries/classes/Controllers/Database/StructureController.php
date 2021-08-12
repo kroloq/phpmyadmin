@@ -484,7 +484,7 @@ class StructureController extends AbstractController
             $curTable = $this->dbi
                 ->getTable($this->db, $currentTable['TABLE_NAME']);
             if (! $curTable->isMerge()) {
-                // checked impact of change of countRecords: not used in rendering -> ok
+
                 $sumEntries += $currentTable['TABLE_ROWS'];
             }
 
@@ -576,7 +576,6 @@ class StructureController extends AbstractController
              * I could have used the PHP ternary conditional operator but I find
              * the code easier to read without this operator.
              */
-            // checked impact of change of countRecords; same result for -1 and false -> ok
             $mayHaveRows = $currentTable['TABLE_ROWS'] > 0 || $tableIsView;
 
             if (! $this->dbIsSystemSchema) {
@@ -623,7 +622,7 @@ class StructureController extends AbstractController
                 ]);
                 $structureTableRows = [];
             }
-            //checked impact of change of countRecords -> ok
+
             [$approxRows, $showSuperscript] = $this->isRowCountApproximated(
                 $currentTable,
                 $tableIsView
@@ -638,9 +637,6 @@ class StructureController extends AbstractController
                 'curr' => $i,
                 'input_class' => implode(' ', $inputClass),
                 'table_is_view' => $tableIsView,
-                // checked impact of change of countRecords:
-                // no impact, because currentTable[TABLE_ROWS]==false would have caused an error in rendering
-                // structure_table_row; so doesn't seem to happen. --> no impact
                 'current_table' => $currentTable,
                 'may_have_rows' => $mayHaveRows,
                 'browse_table_label_title' => htmlspecialchars($currentTable['TABLE_COMMENT']),
@@ -804,7 +800,6 @@ class StructureController extends AbstractController
         // - when it's a view
         //  so ensure that we'll display "in use" below for a table
         //  that needs to be repaired
-        // checked impact of change of countRecords: view will always evaluate to true -> no impact
         if (
             isset($currentTable['TABLE_ROWS'])
             && ($currentTable['ENGINE'] != null || $tableIsView)
@@ -1036,7 +1031,6 @@ class StructureController extends AbstractController
                 // InnoDB table: Row count is not accurate but data and index sizes are.
                 // PBMS table in Drizzle: TABLE_ROWS is taken from table cache,
                 // so it may be unavailable
-                // checked impact of change of countRecords -> no impact
                 [$currentTable, $formattedSize, $unit, $sumSize] = $this->getValuesForInnodbTable(
                     $currentTable,
                     $sumSize
@@ -1066,7 +1060,6 @@ class StructureController extends AbstractController
                 // The idea is to show the size only if Mroonga is available,
                 // in other case the old unknown message will appear
                 if (StorageEngine::hasMroongaEngine()) {
-                    // checked impact of change of countRecords -> no impact
                     [$currentTable, $formattedSize, $unit, $sumSize] = $this->getValuesForMroongaTable(
                         $currentTable,
                         $sumSize
@@ -1087,7 +1080,6 @@ class StructureController extends AbstractController
             || $currentTable['TABLE_TYPE'] === 'SYSTEM VIEW'
         ) {
             // countRecords() takes care of $cfg['MaxExactCountViews']
-            // checked impact of change of countRecords -> no impact
             $currentTable['TABLE_ROWS'] = $this->dbi
                 ->getTable($this->db, $currentTable['TABLE_NAME'])
                 ->countRecords(true);
@@ -1129,9 +1121,6 @@ class StructureController extends AbstractController
         $overheadUnit
     ) {
         if ($this->dbIsSystemSchema) {
-            // checked impact of change of countRecords
-            // caller function getStuffForEngineTypeTable will overwrite it later,
-            // if currentTable is a view --> no impact
             $currentTable['Rows'] = $this->dbi
                 ->getTable($this->db, $currentTable['Name'])
                 ->countRecords();
@@ -1184,9 +1173,6 @@ class StructureController extends AbstractController
         $sumSize
     ) {
         $formattedSize = $unit = '';
-        // checked impact of change of countRecords
-        // false < 0 --> false; -1 < 0 --> true
-        // --> adressed
         if (
             (in_array($currentTable['ENGINE'], ['InnoDB', 'TokuDB'])
             && $currentTable['TABLE_ROWS'] < $GLOBALS['cfg']['MaxExactCount']
@@ -1194,9 +1180,6 @@ class StructureController extends AbstractController
             || ! isset($currentTable['TABLE_ROWS'])
         ) {
             $currentTable['COUNTED'] = true;
-            // checked impact of change of countRecords
-            // -> no impact, because this function only called by getStuffForEngineTypeTable
-            // where TABLE_ROWS will be overwritten
             $currentTable['TABLE_ROWS'] = $this->dbi
                 ->getTable($this->db, $currentTable['TABLE_NAME'])
                 ->countRecords(true);
