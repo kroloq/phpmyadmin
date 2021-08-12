@@ -4069,7 +4069,7 @@ class Results
             $message = $this->setMessageInformation(
                 $sortedColumnMessage,
                 $analyzedSqlResults,
-                ($total == -1) ? 0 : $total,
+                $total == -1 ? 0 : $total,
                 $posNext,
                 $preCount,
                 $afterCount
@@ -4405,12 +4405,11 @@ class Results
         ) {
             $firstShownRec = $_SESSION['tmpval']['pos'];
             $lastShownRec  = $total - 1;
-            $debug=strval($lastShownRec);
         } else {
             $firstShownRec = $_SESSION['tmpval']['pos'];
             $lastShownRec  = $posNext - 1;
         }
-        
+
         $table = new Table($this->properties['table'], $this->properties['db']);
         if (
             $table->isView()

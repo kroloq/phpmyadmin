@@ -421,11 +421,12 @@ class Table implements Stringable
     public function getNumRows()
     {
         $tableNumRowInfo = $this->getStatusInfo('TABLE_ROWS', false, true);
-        if ($tableNumRowInfo === false) {
+        if ($tableNumRowInfo === false  || $tableNumRowInfo === -1) {
             $tableNumRowInfo = $this->dbi->getTable($this->dbName, $GLOBALS['showtable']['Name'])
             ->countRecords(true);
         }
-        return ($tableNumRowInfo == -1) ? 0 : $tableNumRowInfo;
+
+        return $tableNumRowInfo;
     }
 
     /**
@@ -743,8 +744,7 @@ class Table implements Stringable
      *
      * @param bool $forceExact whether to force an exact count
      *
-     * @return mixed the number of records if "retain" param is true,
-     *               otherwise true
+     * @return int the number of records; -1 for views, if MaxExactCount option is 0
      */
     public function countRecords($forceExact = false)
     {

@@ -145,7 +145,7 @@ final class Options
                 'limit_to' => $_POST['limit_to'] ?? null,
                 'limit_from' => $_POST['limit_from'] ?? null,
                 'unlim_num_rows' => $unlimNumRows,
-                'number_of_rows' => ($numRows == -1) ? 0 : $numRows,
+                'number_of_rows' => $numRows == -1 ? 0 : $numRows,
             ];
         }
 

@@ -484,7 +484,6 @@ class StructureController extends AbstractController
             $curTable = $this->dbi
                 ->getTable($this->db, $currentTable['TABLE_NAME']);
             if (! $curTable->isMerge()) {
-
                 $sumEntries += $currentTable['TABLE_ROWS'];
             }
 
