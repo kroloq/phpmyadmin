@@ -311,7 +311,7 @@ class BrowseForeigners
         $pageNow = (int) floor($pos / $this->maxRows) + 1;
 
         $nbTotalPage = (int) ceil($foreignData['the_total'] / $this->maxRows);
-        $nbTotalPage = ($nbTotalPage < 0) ? 0 : $nbTotalPage;
+        $nbTotalPage = $nbTotalPage < 0 ? 0 : $nbTotalPage;
 
         // checked: no impact by change of countRecords()
         if ($foreignData['the_total'] > $this->maxRows) {

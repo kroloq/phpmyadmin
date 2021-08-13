@@ -740,52 +740,32 @@ class Table implements Stringable
     }
 
     /**
-     * Returns the number of records in a cached table
-     * 
-     * @param bool $exact whether to return an exact count
+     * Returns the exact number of records in a cached table
      *
-     * @return int the number of records; -1 if count was not cached (i.e. null or non-numeric)
+     * @return int the number of records; -1 if the table was not cached
      */
 
-    private function getCachedCount($exact = TRUE) {
+    private function getExactCachedCount() {
         $db = $this->dbName;
         $table = $this->name;
-        $property = $exact ? 'ExactRows' : 'Rows';
-        $count = $this->dbi->getCache()->getCachedTableContent([$db, $table, $property]);
-        $count = is_numeric($count) ? (int) $count : -1;
-        return $count;
-    }
 
-    /**
-     * Caches the table
-     * 
-     * @return void
-     */
-    private function cacheTable() {
-        $db = $this->dbName;
-        $table = $this->name;
-        $tmpTables = $this->dbi->getTablesFull();
-        if (isset($tmpTables[$table])) {
-            $this->dbi->getCache()->cacheTableContent(
+        if (is_numeric($this->dbi->getCache()->getCachedTableContent([$db, $table, 'ExactRows']))) {
+            $count = $this->dbi->getCache()->getCachedTableContent(
                 [
                     $db,
                     $table,
-                ],
-                $tmpTables[$table]
+                    'ExactRows',
+                ]
             );
+            return (int) $count;
+        } else {
+            return -1;
         }
     }
 
-    /**
-    * Checks, if the property 'Rows' has been cached
-    *
-    * @return bool Evaluation if property 'Rows' has been cached
-    */
-   private function isCached() {
-       $db = $this->dbName;
-       $table = $this->name;
-       return $this->dbi->getCache()->getCachedTableContent([$db, $table, 'Rows']) == null;
-   }
+    private function getApproximateCachedCount() {
+
+    }
 
     /**
      * Counts and returns (or displays) the number of records in a table
@@ -800,28 +780,53 @@ class Table implements Stringable
         $db = $this->dbName;
         $table = $this->name;
 
-        // check, if cached data (exact count or approximate count) can be returned
-        // cache table, if not yet done
-        $exactCount = $this->getCachedCount();
-        if ($exactCount !== -1) {
-            return $exactCount;
+        // check, if exact number of records has been cached already
+        $rowCount = getExactCachedCount();
+        if ($rowCount == -1) {
 
-        } elseif(! $forceExact && ! $isView) {
-            // @todo: should this function do any caching?
-            if (! $this->isCached()) {
-                $this->cacheTable();
+        }
+        $rowCount = false;
+
+        if (! $forceExact) {
+            if (
+                ($this->dbi->getCache()->getCachedTableContent([$db, $table, 'Rows']) == null)
+                && ! $isView
+            ) {
+                $tmpTables = $this->dbi->getTablesFull($db, $table);
+                if (isset($tmpTables[$table])) {
+                    $this->dbi->getCache()->cacheTableContent(
+                        [
+                            $db,
+                            $table,
+                        ],
+                        $tmpTables[$table]
+                    );
+                }
             }
-            $rowCount = $this->getCachedCount(FALSE);
 
-            // if number of records > MaxExactCount, return approximate number
-            if ($rowCount >= $GLOBALS['cfg']['MaxExactCount']) {
-                return $rowCount;
+            if ($this->dbi->getCache()->getCachedTableContent([$db, $table, 'Rows']) != null) {
+                $rowCount = $this->dbi->getCache()->getCachedTableContent(
+                    [
+                        $db,
+                        $table,
+                        'Rows',
+                    ]
+                );
+            } else {
+                $rowCount = false;
             }
         }
 
-        // no cached data available
+        // for a VIEW, $row_count is always false at this point
+        if (
+            $rowCount !== false
+            && $rowCount >= $GLOBALS['cfg']['MaxExactCount']
+        ) {
+            return $rowCount;
+        }
+
         if (! $isView) {
-            $exactCount = $this->dbi->fetchValue(
+            $rowCount = $this->dbi->fetchValue(
                 'SELECT COUNT(*) FROM ' . Util::backquote($db) . '.'
                 . Util::backquote($table)
             );
@@ -832,7 +837,7 @@ class Table implements Stringable
             // completely the record counting for views
 
             if ($GLOBALS['cfg']['MaxExactCountViews'] == 0) {
-                $exactCount = -1;
+                $rowCount = false;
             } else {
                 // Counting all rows of a VIEW could be too long,
                 // so use a LIMIT clause.
@@ -846,23 +851,20 @@ class Table implements Stringable
                     DatabaseInterface::QUERY_STORE
                 );
                 if (! $this->dbi->getError()) {
-                    $exactCount = $this->dbi->numRows($result);
+                    $rowCount = $this->dbi->numRows($result);
                     $this->dbi->freeResult($result);
-                } else {
-                    $exactCount = -1;
                 }
             }
         }
 
-        $exactCount = is_numeric($exactCount) ? (int) $exactCount : -1;
-        // @todo: should this function do any caching?
-        if ($exactCount !== -1) {
-            $this->dbi->getCache()->cacheTableContent([$db, $table, 'ExactRows'], $exactCount);
+        if ($rowCount) {
+            $this->dbi->getCache()->cacheTableContent([$db, $table, 'ExactRows'], $rowCount);
+        } else {
+            // countRecords should always return int value
+            $rowCount = -1;
         }
 
-        return $exactCount;
-
-        
+        return $rowCount;
     }
 
     /**
