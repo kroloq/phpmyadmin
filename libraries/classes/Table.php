@@ -746,7 +746,6 @@ class Table implements Stringable
      *
      * @return int the number of records; -1 if count was not cached (i.e. null or non-numeric)
      */
-
     private function getCachedCount($exact = TRUE) {
         $db = $this->dbName;
         $table = $this->name;
@@ -764,7 +763,7 @@ class Table implements Stringable
     private function cacheTable() {
         $db = $this->dbName;
         $table = $this->name;
-        $tmpTables = $this->dbi->getTablesFull();
+        $tmpTables = $this->dbi->getTablesFull($db, $table);
         if (isset($tmpTables[$table])) {
             $this->dbi->getCache()->cacheTableContent(
                 [
